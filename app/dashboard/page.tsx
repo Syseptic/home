@@ -33,11 +33,25 @@ export default function DashboardPage() {
     if (session) {
       fetch('/api/notes', { credentials: 'include' })
         .then((res) => res.json())
-        .then((data) => setNotes(Array.isArray(data) ? data : []));
+        .then((data) => {
+          // ✅ Make sure we only keep valid notes with title + content
+          const validNotes = Array.isArray(data)
+            ? data.filter(
+                (n) =>
+                  n &&
+                  typeof n.id === 'string' &&
+                  typeof n.title === 'string' &&
+                  typeof n.content === 'string'
+              )
+            : [];
+          setNotes(validNotes);
+        });
     }
   }, [session]);
 
   const handleAddNote = async () => {
+    if (!title.trim() || !content.trim()) return;
+
     const res = await fetch('/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -47,12 +61,12 @@ export default function DashboardPage() {
 
     const newNote = await res.json();
 
-    if (res.ok) {
+    if (res.ok && newNote && newNote.title && newNote.content) {
       setNotes((prev) => [...prev, newNote]);
       setTitle('');
       setContent('');
     } else {
-      console.error(newNote.message);
+      console.error(newNote?.message || 'Error adding note');
     }
   };
 
@@ -86,10 +100,13 @@ export default function DashboardPage() {
 
       <ul className="mt-4">
         {notes.map((note) => (
-          <li key={note.id} className="border p-2 mb-2">
-            <h2 className="font-bold">{note.title}</h2>
-            <p>{note.content}</p>
-          </li>
+          // ✅ Only render if both title + content exist
+          note?.title && note?.content && (
+            <li key={note.id} className="border p-2 mb-2">
+              <h2 className="font-bold">{note.title}</h2>
+              <p>{note.content}</p>
+            </li>
+          )
         ))}
       </ul>
     </div>
