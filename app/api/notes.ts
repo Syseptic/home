@@ -12,8 +12,21 @@ export default async function handler(
     const { data, error } = await supabase
       .from('notes')
       .insert([{ title, content }])
-      .select('*') // Return inserted row
-      .single();   // Since we're only adding one
+      .select('id, title, content') // Ensure fields match Note interface
+      .single();
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    // This ensures your dashboard receives exactly the shape it needs
+    return res.status(200).json(data);
+  }
+
+  if (req.method === 'GET') {
+    const { data, error } = await supabase
+      .from('notes')
+      .select('id, title, content');
 
     if (error) {
       return res.status(400).json({ message: error.message });
