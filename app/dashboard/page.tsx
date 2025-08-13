@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   const handleAddNote = async () => {
     if (!title.trim() || !content.trim()) return;
-
+  
     const res = await fetch('/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,6 +69,7 @@ export default function DashboardPage() {
       console.error(newNote?.message || 'Error adding note');
     }
   };
+  
 
   if (loading) return <p>Loading...</p>;
 
