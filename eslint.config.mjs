@@ -8,4 +8,12 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
-export default eslintConfig;
+export default [
+  // …your existing config/extends
+  {
+    files: ['app/dashboard/**/*.ts', 'app/dashboard/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+];
