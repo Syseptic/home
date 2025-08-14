@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { error } from 'node:console';
 
 interface Note {
   id: string;
@@ -17,69 +16,89 @@ export default function DashboardPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  // Check if user is logged in
+  // Fetch notes for the logged-in user
+  async function fetchNotes() {
+    setLoading(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+
+    setSession({ user });
+
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching notes:', error);
+      setNotes([]);
+    } else {
+      setNotes(data || []);
+    }
+
+    setLoading(false);
+  }
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        window.location.href = '/login';
-      } else {
-        setSession(data.session);
-      }
-      setLoading(false);
-    });
+    fetchNotes();
   }, []);
 
-  // Load notes once session is ready
-  useEffect(() => {
-    if (session) {
-      fetch('/api/notes', { credentials: 'include' })
-        .then((res) => res.json())
-        .then((data) => {
-          const validNotes = Array.isArray(data)
-            ? data.filter(
-                (n) =>
-                  n &&
-                  typeof n.id === 'string' &&
-                  typeof n.title === 'string' &&
-                  typeof n.content === 'string'
-              )
-            : [];
-          setNotes(validNotes);
-        });
-    }
-  }, [session]);
-
+  // Add a note
   const handleAddNote = async () => {
     if (!title.trim() || !content.trim()) return;
-  
-    const res = await fetch('/api/notes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ title, content }),
-    });
-  
-    let data;
-    try {
-      data = await res.json();
-    } catch (e) {
-      console.error('Invalid JSON response', e);
-      data = {};
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error('No user logged in');
+      return;
     }
-  
-    // accept either { note: { ... } } or the note object directly
-    const note = data?.note ?? data;
-    const message = data?.message ?? data?.error ?? null;
-  
-    if (res.ok && note?.id && note?.title && note?.content) {
-      setNotes(prev => [...prev, note]);
+
+    const { data, error } = await supabase
+      .from('notes')
+      .insert([{ title, content, user_id: user.id }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding note', error);
+    } else {
+      setNotes((prev) => [data, ...prev]);
       setTitle('');
       setContent('');
-    } else {
-      console.error('Error adding note', message, data);
     }
   };
+
+  async function handleEditNote(id: string, newTitle: string, newContent: string) {
+    try {
+      const { error } = await supabase
+        .from("notes")
+        .update({
+          title: newTitle,
+          content: newContent,
+        })
+        .eq("id", id)
   
+      if (error) {
+        console.error("Error editing note:", error.message);
+        return;
+      }
+  
+      // Refresh notes list after editing
+      fetchNotes();
+    } catch (err) {
+      console.error("Unexpected error editing note:", err);
+    }
+  }
   
 
   if (loading) return <p>Loading...</p>;
@@ -112,12 +131,19 @@ export default function DashboardPage() {
 
       <ul className="mt-4">
         {notes.map((note) => (
-          note?.title && note?.content && (
-            <li key={note.id} className="border p-2 mb-2">
-              <h2 className="font-bold">{note.title}</h2>
-              <p>{note.content}</p>
-            </li>
-          )
+          <li key={note.id} className="border p-2 mb-2">
+            <h2 className="font-bold">{note.title}</h2>
+            <p>{note.content}</p>
+            <button
+                onClick={() =>
+                  handleEditNote(note.id, prompt("New title:", note.title) || note.title, prompt("New content:", note.content) || note.content)
+                }
+                className="px-2 py-1 bg-yellow-500 text-white rounded"
+              >
+                Edit
+              </button>
+
+          </li>
         ))}
       </ul>
     </div>
