@@ -14,11 +14,28 @@ export default async function handler(
         return res.status(400).json({ message: 'Title and content are required' });
       }
 
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error(userError);
+        return;
+      }
+
+      if (!user) {
+        console.error("No user is logged in.");
+        return;
+      }
+
       const { data, error } = await supabase
-        .from('notes')
-        .insert([{ title, content }])
-        .select('id, title, content')
-        .single(); // ensure exactly one note comes back
+        .from("notes")
+        .insert([{ title, content, user_id: user.id }])
+        .select();
+
+      if (error) {
+        console.error(error);
+      } else {
+        console.log(data);
+      }
 
       if (error) {
         return res.status(400).json({ message: error.message });

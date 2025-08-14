@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { error } from 'node:console';
 
 interface Note {
   id: string;
@@ -54,20 +55,31 @@ export default function DashboardPage() {
     const res = await fetch('/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // send auth cookie
+      credentials: 'include',
       body: JSON.stringify({ title, content }),
     });
-
-    const { note, message } = await res.json();
-
-    if (res.ok && note?.title && note?.content) {
-      setNotes(prev => [...prev, note]); // instantly update UI
+  
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      console.error('Invalid JSON response', e);
+      data = {};
+    }
+  
+    // accept either { note: { ... } } or the note object directly
+    const note = data?.note ?? data;
+    const message = data?.message ?? data?.error ?? null;
+  
+    if (res.ok && note?.id && note?.title && note?.content) {
+      setNotes(prev => [...prev, note]);
       setTitle('');
       setContent('');
     } else {
-      console.error(message || 'Error adding note');
-    }    
+      console.error('Error adding note', message, data);
+    }
   };
+  
   
 
   if (loading) return <p>Loading...</p>;
