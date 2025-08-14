@@ -7,32 +7,43 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === 'POST') {
-    const { title, content } = req.body;
+    try {
+      const { title, content } = req.body;
 
-    const { data, error } = await supabase
-      .from('notes')
-      .insert([{ title, content }])
-      .select('id, title, content') // Ensure fields match Note interface
-      .single();
+      if (!title || !content) {
+        return res.status(400).json({ message: 'Title and content are required' });
+      }
 
-    if (error) {
-      return res.status(400).json({ message: error.message });
+      const { data, error } = await supabase
+        .from('notes')
+        .insert([{ title, content }])
+        .select('id, title, content')
+        .single(); // ensure exactly one note comes back
+
+      if (error) {
+        return res.status(400).json({ message: error.message });
+      }
+
+      return res.status(200).json({ note: data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message || 'Internal Server Error' });
     }
-
-    // This ensures your dashboard receives exactly the shape it needs
-    return res.status(200).json(data);
   }
 
   if (req.method === 'GET') {
-    const { data, error } = await supabase
-      .from('notes')
-      .select('id, title, content');
+    try {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('id, title, content');
 
-    if (error) {
-      return res.status(400).json({ message: error.message });
+      if (error) {
+        return res.status(400).json({ message: error.message });
+      }
+
+      return res.status(200).json({ notes: data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message || 'Internal Server Error' });
     }
-
-    return res.status(200).json(data);
   }
 
   res.status(405).json({ message: 'Method not allowed' });

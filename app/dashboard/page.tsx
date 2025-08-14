@@ -34,7 +34,6 @@ export default function DashboardPage() {
       fetch('/api/notes', { credentials: 'include' })
         .then((res) => res.json())
         .then((data) => {
-          // ✅ Make sure we only keep valid notes with title + content
           const validNotes = Array.isArray(data)
             ? data.filter(
                 (n) =>
@@ -59,15 +58,15 @@ export default function DashboardPage() {
       body: JSON.stringify({ title, content }),
     });
 
-    const newNote = await res.json();
+    const { note, message } = await res.json();
 
-    if (res.ok && newNote && newNote.title && newNote.content) {
-      setNotes((prev) => [...prev, newNote]);
+    if (res.ok && note?.title && note?.content) {
+      setNotes(prev => [...prev, note]); // instantly update UI
       setTitle('');
       setContent('');
     } else {
-      console.error(newNote?.message || 'Error adding note');
-    }
+      console.error(message || 'Error adding note');
+    }    
   };
   
 
@@ -101,7 +100,6 @@ export default function DashboardPage() {
 
       <ul className="mt-4">
         {notes.map((note) => (
-          // ✅ Only render if both title + content exist
           note?.title && note?.content && (
             <li key={note.id} className="border p-2 mb-2">
               <h2 className="font-bold">{note.title}</h2>
