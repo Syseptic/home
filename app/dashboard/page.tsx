@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Link from "next/link";
 
 interface Note {
   id: string;
@@ -134,14 +135,11 @@ export default function DashboardPage() {
           <li key={note.id} className="border p-2 mb-2">
             <h2 className="font-bold">{note.title}</h2>
             <p>{note.content}</p>
-            <button
-                onClick={() =>
-                  handleEditNote(note.id, prompt("New title:", note.title) || note.title, prompt("New content:", note.content) || note.content)
-                }
-                className="px-2 py-1 bg-yellow-500 text-white rounded"
-              >
+            <Link href={`/dashboard/edit/${note.id}`}>
+              <button className="px-2 py-1 bg-blue-500 text-white rounded">
                 Edit
               </button>
+            </Link>
 
           </li>
         ))}
