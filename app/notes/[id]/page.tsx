@@ -1,4 +1,7 @@
 // app/notes/[id]/page.tsx
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -16,7 +19,6 @@ export default async function PublicNotePage({ params }: { params: Params }) {
     .eq("id", params.id)
     .single();
 
-  // Only show if it's public
   if (error || !data || !data.is_public) return notFound();
 
   return (
@@ -24,15 +26,10 @@ export default async function PublicNotePage({ params }: { params: Params }) {
       <Link href="/" className="text-sm text-blue-600 hover:underline">
         ← Back to Public Portfolio
       </Link>
-
-      <h1 className="mt-2 text-3xl font-semibold">
-        {data.title || "Untitled"}
-      </h1>
+      <h1 className="mt-2 text-3xl font-semibold">{data.title || "Untitled"}</h1>
       <p className="text-sm text-gray-500">
         Updated {new Date(data.updated_at).toLocaleString()}
       </p>
-
-      {/* Render full content */}
       <article className="prose max-w-none mt-6">
         <Markdown>{data.content ?? ""}</Markdown>
       </article>
