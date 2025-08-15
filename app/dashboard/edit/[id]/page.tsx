@@ -18,8 +18,10 @@ export default function EditNotePage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
@@ -29,10 +31,7 @@ export default function EditNotePage() {
   const pushToast = (message: string, variant: Toast["variant"] = "info") => {
     const idNum = toastId.current++;
     setToasts((t) => [...t, { id: idNum, message, variant }]);
-    // Auto-dismiss after 2.5s
-    setTimeout(() => {
-      setToasts((t) => t.filter((x) => x.id !== idNum));
-    }, 2500);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== idNum)), 2500);
   };
 
   // Confirm dialog state
@@ -48,7 +47,7 @@ export default function EditNotePage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("notes")
-        .select("title, content")
+        .select("title, content, is_public")
         .eq("id", id)
         .single();
 
@@ -58,6 +57,7 @@ export default function EditNotePage() {
       else {
         setTitle(data?.title ?? "");
         setContent(data?.content ?? "");
+        setIsPublic(Boolean(data?.is_public));
       }
       setLoading(false);
     })();
@@ -67,7 +67,7 @@ export default function EditNotePage() {
     };
   }, [id]);
 
-  // Save
+  // Save (title/content)
   const saveNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!id) return setErrMsg("Missing note id.");
@@ -88,6 +88,27 @@ export default function EditNotePage() {
     }
     pushToast("Note saved", "success");
     router.push("/dashboard");
+  };
+
+  // Toggle public/private (instant)
+  const togglePublic = async () => {
+    if (!id) return setErrMsg("Missing note id.");
+    const next = !isPublic;
+    setToggling(true);
+    setIsPublic(next); // optimistic
+    const { error } = await supabase
+      .from("notes")
+      .update({ is_public: next })
+      .eq("id", id);
+    setToggling(false);
+
+    if (error) {
+      // revert on failure
+      setIsPublic(!next);
+      pushToast(error.message ?? "Failed to update visibility", "error");
+      return;
+    }
+    pushToast(next ? "Note is now Public" : "Note set to Private", "success");
   };
 
   // Delete (triggered after confirm)
@@ -113,7 +134,20 @@ export default function EditNotePage() {
 
   return (
     <div className="p-4 max-w-2xl mx-auto relative">
-      <h1 className="text-xl font-bold mb-4">Edit Note</h1>
+      <div className="mb-4 flex items-center gap-3">
+        <h1 className="text-xl font-bold">Edit Note</h1>
+        <button
+          type="button"
+          onClick={togglePublic}
+          disabled={toggling}
+          className={`ml-auto px-3 py-1.5 rounded text-white text-sm ${
+            isPublic ? "bg-green-600" : "bg-gray-500"
+          } disabled:opacity-60`}
+          title={isPublic ? "Public" : "Private"}
+        >
+          {toggling ? "…" : isPublic ? "Public" : "Private"}
+        </button>
+      </div>
 
       {errMsg && (
         <div className="mb-4 rounded border border-red-300 bg-red-50 p-2 text-red-700">
@@ -221,13 +255,11 @@ function ConfirmDialog({
   onCancel: () => void;
   disabled?: boolean;
 }) {
-  // Focus the dialog for screen readers
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     ref.current?.focus();
   }, []);
 
-  // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCancel();

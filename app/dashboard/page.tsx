@@ -8,7 +8,7 @@ interface Note {
   id: string;
   title: string;
   content: string;
-  is_public: boolean; // added
+  is_public: boolean;
 }
 
 export default function DashboardPage() {
@@ -80,26 +80,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Toggle public/private
-  const togglePublic = async (noteId: string, currentValue: boolean) => {
-    const { error } = await supabase
-      .from('notes')
-      .update({ is_public: !currentValue })
-      .eq('id', noteId);
-
-    if (error) {
-      console.error('Error toggling public status:', error);
-      return;
-    }
-
-    // Update locally for instant UI change
-    setNotes((prev) =>
-      prev.map((n) =>
-        n.id === noteId ? { ...n, is_public: !currentValue } : n
-      )
-    );
-  };
-
   if (loading) return <p>Loading...</p>;
 
   return (
@@ -133,17 +113,6 @@ export default function DashboardPage() {
           <li key={note.id} className="border p-2 mb-2">
             <h2 className="font-bold">{note.title}</h2>
             <p>{note.content}</p>
-
-            {/* Public toggle button */}
-            <button
-              onClick={() => togglePublic(note.id, note.is_public)}
-              className={`px-2 py-1 rounded text-white mr-2 ${
-                note.is_public ? 'bg-green-600' : 'bg-gray-500'
-              }`}
-            >
-              {note.is_public ? 'Public' : 'Private'}
-            </button>
-
             <Link href={`/dashboard/edit/${note.id}`}>
               <button className="px-2 py-1 bg-blue-500 text-white rounded">
                 Edit
