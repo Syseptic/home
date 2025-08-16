@@ -91,10 +91,15 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
         <motion.div
           ref={ref}
           // 👉 pointer events are more reliable across devices
-          onPointerMove={(e) => mouseX.set(e.clientX)}
-          onPointerEnter={() => setHovering(true)}
+          onPointerMove={(e) => {
+            mouseX.set(e.clientX);
+            if (e.pointerType === "mouse") setHovering(true);
+          }}
+          onPointerEnter={(e) => {
+            if (e.pointerType === "mouse") setHovering(true);
+          }}
           onPointerLeave={() => {
-            mouseX.set(Number.POSITIVE_INFINITY); // far away → baseline size
+            mouseX.set(Number.POSITIVE_INFINITY);
             setHovering(false);
           }}
           style={{ paddingLeft: padX, paddingRight: padX, paddingTop: padY, paddingBottom: padY }}
