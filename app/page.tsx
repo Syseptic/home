@@ -44,7 +44,7 @@ export default function HomePage() {
       {/* Hero */}
       <header className="mx-auto max-w-3xl px-6 pt-20 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">
-          Shreyajs Yadav
+          Shreyaj Yadav
         </h1>
         <p className="mt-3 text-balance text-muted-foreground">
           Short one-liner about what you do. Keep it crisp.  

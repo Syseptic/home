@@ -22,7 +22,6 @@ export default function AppDock() {
 
   // Desktop vs Mobile sizing
   const iconSize = isMobile ? 36 : 48;
-  const iconMagnification = isMobile ? 44 : 96; // gentle on mobile
   const iconDistance = isMobile ? 160 : 240;    // shorter spread on mobile
 
   return (
@@ -35,7 +34,6 @@ export default function AppDock() {
     >
       <Dock
         iconSize={iconSize}
-        //iconMagnification={iconMagnification}
         iconDistance={iconDistance}
         direction="bottom"
         className="
