@@ -1,16 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Params = { id: string };
-
-type Toast = {
-  id: number;
-  message: string;
-  variant?: "success" | "error" | "info";
-};
 
 export default function EditNotePage() {
   const { id } = useParams<Params>();
@@ -23,27 +34,10 @@ export default function EditNotePage() {
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [errMsg, setErrMsg] = useState<string | null>(null);
 
-  // Toast state
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const toastId = useRef(1);
-  const pushToast = (message: string, variant: Toast["variant"] = "info") => {
-    const idNum = toastId.current++;
-    setToasts((t) => [...t, { id: idNum, message, variant }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== idNum)), 2500);
-  };
-
-  // Confirm dialog state
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // Fetch note
   useEffect(() => {
     if (!id) return;
-    let cancelled = false;
-
     (async () => {
-      setErrMsg(null);
       setLoading(true);
       const { data, error } = await supabase
         .from("notes")
@@ -51,28 +45,21 @@ export default function EditNotePage() {
         .eq("id", id)
         .single();
 
-      if (cancelled) return;
-
-      if (error) setErrMsg(error.message ?? "Failed to load note.");
-      else {
+      if (error) {
+        toast.error(error.message || "Failed to load note");
+      } else {
         setTitle(data?.title ?? "");
         setContent(data?.content ?? "");
         setIsPublic(Boolean(data?.is_public));
       }
       setLoading(false);
     })();
-
-    return () => {
-      cancelled = true;
-    };
   }, [id]);
 
-  // Save (title/content)
   const saveNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!id) return setErrMsg("Missing note id.");
+    if (!id) return;
     setSaving(true);
-    setErrMsg(null);
 
     const { error } = await supabase
       .from("notes")
@@ -81,237 +68,101 @@ export default function EditNotePage() {
 
     setSaving(false);
 
-    if (error) {
-      setErrMsg(error.message ?? "Failed to save note.");
-      pushToast("Failed to save note.", "error");
-      return;
-    }
-    pushToast("Note saved", "success");
+    if (error) return toast.error(error.message || "Failed to save note");
+    toast.success("Note saved");
     router.push("/dashboard");
   };
 
-  // Toggle public/private (instant)
   const togglePublic = async () => {
-    if (!id) return setErrMsg("Missing note id.");
+    if (!id) return;
     const next = !isPublic;
     setToggling(true);
     setIsPublic(next); // optimistic
-    const { error } = await supabase
-      .from("notes")
-      .update({ is_public: next })
-      .eq("id", id);
+    const { error } = await supabase.from("notes").update({ is_public: next }).eq("id", id);
     setToggling(false);
 
     if (error) {
-      // revert on failure
       setIsPublic(!next);
-      pushToast(error.message ?? "Failed to update visibility", "error");
-      return;
+      return toast.error(error.message || "Failed to update visibility");
     }
-    pushToast(next ? "Note is now Public" : "Note set to Private", "success");
+    toast.success(next ? "Note is now Public" : "Note set to Private");
   };
 
-  // Delete (triggered after confirm)
   const reallyDeleteNote = async () => {
-    if (!id) return setErrMsg("Missing note id.");
+    if (!id) return;
     setDeleting(true);
-    setErrMsg(null);
-    try {
-      const { error } = await supabase.from("notes").delete().eq("id", id);
-      if (error) throw error;
-      pushToast("Note deleted", "success");
-      router.push("/dashboard");
-    } catch (err: any) {
-      setErrMsg(err?.message ?? "Failed to delete note.");
-      pushToast("Failed to delete note", "error");
-    } finally {
-      setDeleting(false);
-      setConfirmOpen(false);
-    }
+    const { error } = await supabase.from("notes").delete().eq("id", id);
+    setDeleting(false);
+
+    if (error) return toast.error(error.message || "Failed to delete note");
+    toast.success("Note deleted");
+    router.push("/dashboard");
   };
 
-  if (loading) return <p className="p-4">Loading…</p>;
+  if (loading) return <p className="p-6">Loading…</p>;
 
   return (
-    <div className="p-4 max-w-2xl mx-auto relative">
-      <div className="mb-4 flex items-center gap-3">
-        <h1 className="text-xl font-bold">Edit Note</h1>
-        <button
-          type="button"
-          onClick={togglePublic}
-          disabled={toggling}
-          className={`ml-auto px-3 py-1.5 rounded text-white text-sm ${
-            isPublic ? "bg-green-600" : "bg-gray-500"
-          } disabled:opacity-60`}
-          title={isPublic ? "Public" : "Private"}
-        >
-          {toggling ? "…" : isPublic ? "Public" : "Private"}
-        </button>
-      </div>
-
-      {errMsg && (
-        <div className="mb-4 rounded border border-red-300 bg-red-50 p-2 text-red-700">
-          {errMsg}
+    <div className="p-6 max-w-2xl mx-auto">
+      <div className="mb-6 flex items-center gap-3">
+        <h1 className="text-2xl font-bold">Edit Note</h1>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-sm">{isPublic ? "Public" : "Private"}</span>
+          <Switch checked={isPublic} onCheckedChange={togglePublic} disabled={toggling} />
+          {isPublic && (
+            <Button variant="outline" asChild>
+              <a href={`/notes/${id}`} target="_blank" rel="noreferrer">View public page</a>
+            </Button>
+          )}
         </div>
-      )}
+      </div>
 
       <form className="space-y-4" onSubmit={saveNote}>
-        <input
-          type="text"
-          className="w-full p-2 border rounded"
+        <Input
+          placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
           required
         />
-
-        <textarea
-          className="w-full p-2 border rounded h-64"
+        <Textarea
+          placeholder="Write your note…"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your note…"
+          className="min-h-[300px]"
         />
 
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
+        <div className="flex items-center justify-between gap-2">
+          <div className="space-x-2">
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => router.push("/dashboard")}>
+              Cancel
+            </Button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="px-4 py-2 bg-gray-400 text-white rounded"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setConfirmOpen(true)}
-            disabled={deleting}
-            className="ml-auto px-4 py-2 bg-red-600 text-white rounded disabled:opacity-60"
-            title="Delete this note"
-          >
-            {deleting ? "Deleting…" : "Delete"}
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button type="button" variant="destructive" disabled={deleting}>
+                {deleting ? "Deleting…" : "Delete"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this note?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={reallyDeleteNote} disabled={deleting}>
+                  {deleting ? "Deleting…" : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </form>
-
-      {/* Toasts */}
-      <div className="fixed right-4 bottom-4 flex flex-col gap-2 z-50">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            role="status"
-            className={[
-              "rounded px-4 py-2 shadow text-white",
-              t.variant === "success" && "bg-green-600",
-              t.variant === "error" && "bg-red-600",
-              (!t.variant || t.variant === "info") && "bg-gray-900",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {t.message}
-          </div>
-        ))}
-      </div>
-
-      {/* Confirm Modal */}
-      {confirmOpen && (
-        <ConfirmDialog
-          title="Delete this note?"
-          description="This action cannot be undone."
-          confirmLabel={deleting ? "Deleting…" : "Delete"}
-          cancelLabel="Cancel"
-          onConfirm={reallyDeleteNote}
-          onCancel={() => setConfirmOpen(false)}
-          disabled={deleting}
-        />
-      )}
-    </div>
-  );
-}
-
-/** Accessible, dependency-free modal */
-function ConfirmDialog({
-  title,
-  description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  onConfirm,
-  onCancel,
-  disabled,
-}: {
-  title: string;
-  description?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  disabled?: boolean;
-}) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    ref.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onCancel]);
-
-  return (
-    <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="confirm-title"
-      aria-describedby="confirm-desc"
-      onClick={onCancel}
-    >
-      <div
-        ref={ref}
-        tabIndex={-1}
-        className="w-full max-w-md rounded-lg bg-white shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-5">
-          <h2 id="confirm-title" className="text-lg font-semibold">
-            {title}
-          </h2>
-          {description && (
-            <p id="confirm-desc" className="mt-2 text-gray-600">
-              {description}
-            </p>
-          )}
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 rounded border border-gray-300 text-gray-700 bg-white"
-              disabled={disabled}
-            >
-              {cancelLabel}
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="px-4 py-2 rounded bg-red-600 text-white disabled:opacity-60"
-              disabled={disabled}
-            >
-              {confirmLabel}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
