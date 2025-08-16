@@ -35,7 +35,7 @@ export default function AppDock() {
     >
       <Dock
         iconSize={iconSize}
-        iconMagnification={iconMagnification}
+        //iconMagnification={iconMagnification}
         iconDistance={iconDistance}
         direction="bottom"
         className="
