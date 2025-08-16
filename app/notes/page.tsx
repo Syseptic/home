@@ -6,7 +6,8 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AppDock } from "../page";
+import AppDock from "@/components/magicui/appdock";
+
 
 type PublicNote = {
   id: string;
