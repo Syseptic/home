@@ -6,7 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import SiteDock from "@/components/magicui/site-dock";
+import { AppDock } from "../page";
 
 type PublicNote = {
   id: string;
@@ -74,7 +74,7 @@ export default function NotesIndexPage() {
           ))
         )}
       </div>
-       <SiteDock />
+      <AppDock />
     </main>
   );
 }
