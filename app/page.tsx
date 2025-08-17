@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowUpRight, Github, Linkedin, Mail  } from "lucide-react";
 import AppDock from "@/components/magicui/appdock";
+import dynamic from "next/dynamic";
+const HelloSplash = dynamic(() => import("@/components/hellosplash"), { ssr: true });
 
 interface PublicNote {
   id: string;
@@ -40,6 +42,7 @@ export default function HomePage() {
   }, []);
 
   return (
+    <HelloSplash step={160} hold={600}>
     <div className="min-h-screen">
       {/* Hero */}
       <header className="mx-auto max-w-3xl px-6 pt-20 text-center">
@@ -77,5 +80,6 @@ export default function HomePage() {
       </footer>
       <AppDock />
     </div>
+    </HelloSplash>
   );
 }
