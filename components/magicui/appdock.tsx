@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { Dock, DockIcon, DockSeparator } from "@/components/magicui/dock";
-import { Home, PencilLine, Github, Linkedin, Mail, MoonStar } from "lucide-react";
+import { Home, PencilLine, Github, Linkedin, Mail, MoonStar, Sun } from "lucide-react";
+import { useDarkMode } from "@/components/theme"; 
 
 export default function AppDock() {
+  const { isDark, setIsDark } = useDarkMode();
   return (
     <div
       className="
@@ -132,9 +134,18 @@ export default function AppDock() {
 
           <DockSeparator />
 
-          <button aria-label="Toggle theme" title="Toggle theme" type="button">
+          <button
+            onClick={() => setIsDark(!isDark)}
+            aria-label="Toggle theme"
+            title="Toggle theme"
+            type="button"
+          >
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
-              <MoonStar className="h-6 w-6" strokeWidth={1.5} />
+              {isDark ? (
+                <Sun className="h-6 w-6" strokeWidth={1.5} />
+              ) : (
+                <MoonStar className="h-6 w-6" strokeWidth={1.5} />
+              )}
             </DockIcon>
           </button>
         </Dock>
