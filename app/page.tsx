@@ -42,7 +42,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <HelloSplash step={160} hold={600}>
+    <HelloSplash step={160} hold={600} bigger>
     <div className="min-h-screen">
       {/* Hero */}
       <header className="mx-auto max-w-3xl px-6 pt-20 text-center">
