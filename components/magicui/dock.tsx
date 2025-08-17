@@ -7,7 +7,6 @@ import {
   MotionValue,
   useMotionValue,
   useTransform,
-  useSpring,
 } from "motion/react";
 import React, {
   PropsWithChildren,
@@ -18,39 +17,35 @@ import React, {
 } from "react";
 import { cn } from "@/lib/utils";
 
-/** Props for the Dock container (no magnification; spacing-only) */
 export interface DockProps extends VariantProps<typeof dockVariants> {
   className?: string;
-  iconSize?: number;          // fixed icon square (px)
-  iconDistance?: number;      // influence radius for spacing
-  // iconMagnification?: number; // ignored, kept out to avoid confusion
+  iconSize?: number;           // fixed icon square (px)
+  iconDistance?: number;       // influence radius for spacing
+  iconMagnification?: number;  // accepted but ignored (BC)
   direction?: "top" | "middle" | "bottom";
   children: React.ReactNode;
 }
 
-/** Defaults */
 const DEFAULT_SIZE = 48;
 const DEFAULT_DISTANCE = 220;
 
-/** Fixed vertical padding → height never changes */
+// Fixed vertical padding → height never changes
 const dockVariants = cva(
   "supports-backdrop-blur:bg-white/10 supports-backdrop-blur:dark:bg-black/10 " +
     "mx-auto flex w-max items-center justify-center rounded-2xl border border-white/10 " +
     "py-2 px-3 backdrop-blur-md"
 );
 
-/** Internal context shared with icons & separators */
 type Ctx = {
   size: number;                // icon square
   distance: number;            // spacing influence
-  mouseX: MotionValue<number>; // smoothed cursor x (viewport) or +∞
+  mouseX: MotionValue<number>; // cursor x (viewport) or +∞
   baseGap: number;             // min gap
   maxGap: number;              // max gap near cursor
 };
 
 const DockCtx = createContext<Ctx | null>(null);
 
-/** Dock container */
 const Dock = React.forwardRef<HTMLDivElement, DockProps>(
   (
     {
@@ -58,45 +53,38 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
       children,
       iconSize = DEFAULT_SIZE,
       iconDistance = DEFAULT_DISTANCE,
+      // iconMagnification is ignored on purpose
       direction = "middle",
       ...props
     },
     ref
   ) => {
-    // Source pointer position. Defaults to "far away" (baseline gaps).
-    const rawX = useMotionValue<number>(Number.POSITIVE_INFINITY);
-
-    // Smooth the pointer for buttery motion.
-    const smoothedX = useSpring(rawX, {
-      stiffness: 180,
-      damping: 26,
-      mass: 0.25,
-    });
+    // Pointer position for mouse. Keep +∞ by default.
+    const mouseX = useMotionValue<number>(Number.POSITIVE_INFINITY);
 
     const ctx = useMemo<Ctx>(
       () => ({
         size: iconSize,
         distance: iconDistance,
-        mouseX: smoothedX,
+        mouseX,
         baseGap: 8,
         maxGap: 18,
       }),
-      [iconSize, iconDistance, smoothedX]
+      [iconSize, iconDistance, mouseX]
     );
 
     return (
       <DockCtx.Provider value={ctx}>
         <motion.div
           ref={ref}
-          // Desktop/trackpads: always update via mouse events.
-          onMouseMove={(e) => rawX.set(e.clientX)}
-          // Pens/other non-touch pointers also work:
+          // Only update for mouse; touch will keep +∞ → constant spacing (no glitches)
           onPointerMove={(e) => {
-            if (e.pointerType !== "touch") rawX.set(e.clientX);
+            if (e.pointerType === "mouse") mouseX.set(e.clientX);
           }}
-          // Reset to baseline on leave.
-          onMouseLeave={() => rawX.set(Number.POSITIVE_INFINITY)}
-          onPointerLeave={() => rawX.set(Number.POSITIVE_INFINITY)}
+          onPointerLeave={() => {
+            // Reset to baseline spacing
+            mouseX.set(Number.POSITIVE_INFINITY);
+          }}
           {...props}
           className={cn(dockVariants({ className }), {
             "items-start": direction === "top",
@@ -112,7 +100,6 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
 );
 Dock.displayName = "Dock";
 
-/** Dock icon (fixed size; spacing animates) */
 export interface DockIconProps
   extends Omit<MotionProps & React.HTMLAttributes<HTMLDivElement>, "children"> {
   className?: string;
@@ -127,23 +114,21 @@ const DockIcon = ({ className, children, ...props }: DockIconProps) => {
 
   const { size: S, distance: D, mouseX, baseGap, maxGap } = ctx;
 
-  // Keep height constant via fixed size + fixed padding.
   const padding = Math.max(4, S * 0.1);
 
-  // Distance from (smoothed) cursor to this icon’s center.
+  // Distance from cursor; stays "far" (+∞) on touch → constant gap
   const distanceCalc = useTransform(mouseX, (val: number) => {
     const b = ref.current?.getBoundingClientRect();
-    if (!b || !isFinite(val)) return D * 2; // far → baseline
+    if (!b || !isFinite(val)) return D * 2;
     return val - (b.left + b.width / 2);
   });
 
-  // Proximity 0..1 (closest → 1)
+  // Proximity 0..1
   const absDist = useTransform(distanceCalc, (d) => Math.abs(d));
   const proximity = useTransform(absDist, [0, D], [1, 0]);
 
-  // Gap grows near cursor; spring for smoothness.
+  // Gap grows near cursor; symmetric so separators look even
   const gap = useTransform(proximity, [0, 1], [baseGap, maxGap]);
-  const gapSpring = useSpring(gap, { stiffness: 260, damping: 30, mass: 0.3 });
 
   return (
     <motion.div
@@ -151,8 +136,8 @@ const DockIcon = ({ className, children, ...props }: DockIconProps) => {
       style={{
         width: S,
         height: S,
-        marginLeft: gapSpring,
-        marginRight: gapSpring,
+        marginLeft: gap,
+        marginRight: gap,
         padding,
         willChange: "margin",
       }}
@@ -168,7 +153,6 @@ const DockIcon = ({ className, children, ...props }: DockIconProps) => {
 };
 DockIcon.displayName = "DockIcon";
 
-/** Thin vertical divider that shares the same spacing animation */
 function DockSeparator({ className }: { className?: string }) {
   const ctx = useContext(DockCtx)!;
   const { size: S, mouseX, distance: D, baseGap, maxGap } = ctx;
@@ -182,9 +166,7 @@ function DockSeparator({ className }: { className?: string }) {
 
   const absDist = useTransform(distanceCalc, (d) => Math.abs(d));
   const proximity = useTransform(absDist, [0, D], [1, 0]);
-
   const gap = useTransform(proximity, [0, 1], [baseGap, maxGap]);
-  const gapSpring = useSpring(gap, { stiffness: 260, damping: 30, mass: 0.3 });
 
   return (
     <motion.span
@@ -193,8 +175,8 @@ function DockSeparator({ className }: { className?: string }) {
       className={cn("self-center w-px bg-white/12", className)}
       style={{
         height: Math.round(S * 0.8),
-        marginLeft: gapSpring,
-        marginRight: gapSpring,
+        marginLeft: gap,
+        marginRight: gap,
         willChange: "margin",
       }}
     />
