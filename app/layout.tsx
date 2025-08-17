@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import dynamic from "next/dynamic";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,6 +19,8 @@ export const metadata: Metadata = {
   description: "Built by Shreyaj Yadav",
 };
 
+const HelloSplash = dynamic(() => import("@/components/hellosplash"), { ssr: true });
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <HelloSplash step={160} hold={600}>
+          {children}
+        </HelloSplash>
         <Toaster richColors closeButton position="bottom-right" />
       </body>
     </html>
