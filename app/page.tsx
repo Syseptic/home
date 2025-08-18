@@ -24,7 +24,7 @@ interface PublicNote {
 }
 
 
-export function LoginPage() {
+function LoginPage() {
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
