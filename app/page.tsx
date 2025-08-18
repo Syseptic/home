@@ -5,11 +5,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowUpRight, Github, Linkedin, Mail  } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import AppDock from "@/components/magicui/appdock";
 import dynamic from "next/dynamic";
 import { Meteors } from "@/components/magicui/meteors";
@@ -77,18 +74,8 @@ export default function HomePage() {
         <Separator />
       </div>
 
-      {/* Notes section (center of page) */}
       <section className="mx-auto max-w-3xl px-6 py-12">
-        <div className="mb-6 flex items-baseline justify-between">
-          <h2 className="text-xl font-medium">Notes</h2>
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            All notes <ArrowUpRight className="ml-1 h-4 w-4" />
-          </Link>
         
-        </div>
       </section>
 
       {/* Footer */}

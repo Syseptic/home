@@ -4,7 +4,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Dock, DockIcon, DockSeparator } from "@/components/magicui/dock";
-import { Home, PencilLine, Github, Linkedin, Mail, Instagram } from "lucide-react";
+import { Home, PencilLine, Github, Linkedin, Instagram } from "lucide-react";
 
 
 // Import MagicUI toggler without SSR to avoid hydration mismatch
@@ -42,7 +42,7 @@ export default function AppDock() {
             </DockIcon>
           </Link>
 
-          <Link href="/notes" aria-label="Notes" title="Notes">
+          <Link href="/memories" aria-label="Memories" title="Memories">
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
               <PencilLine className="h-5 w-5" strokeWidth={1.5} />
             </DockIcon>
@@ -96,7 +96,7 @@ export default function AppDock() {
             </DockIcon>
           </Link>
 
-          <Link href="/notes" aria-label="Notes" title="Notes">
+          <Link href="/memories" aria-label="Memories" title="Memories">
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
               <PencilLine className="h-6 w-6" strokeWidth={1.5} />
             </DockIcon>

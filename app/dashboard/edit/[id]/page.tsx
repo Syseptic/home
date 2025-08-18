@@ -110,7 +110,7 @@ export default function EditNotePage() {
           <Switch checked={isPublic} onCheckedChange={togglePublic} disabled={toggling} />
           {isPublic && (
             <Button variant="outline" asChild>
-              <a href={`/notes/${id}`} target="_blank" rel="noreferrer">View public page</a>
+              <a href={`/memories/${id}`} target="_blank" rel="noreferrer">View public page</a>
             </Button>
           )}
         </div>

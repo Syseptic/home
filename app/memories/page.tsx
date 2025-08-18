@@ -35,9 +35,9 @@ export default function NotesIndexPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">Notes</h1>
+      <h1 className="text-2xl font-semibold">Memories</h1>
       <p className="text-sm text-muted-foreground">
-        Public notes, newest first.
+        Public memories, newest first.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export default function NotesIndexPage() {
           </Card>
         ) : (
           notes.map((n) => (
-            <Link key={n.id} href={`/notes/${n.id}`}>
+            <Link key={n.id} href={`/memories/${n.id}`}>
               <Card className="transition hover:bg-muted/40">
                 <CardHeader className="pb-2">
                   <CardTitle className="line-clamp-1 text-base">
