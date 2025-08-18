@@ -142,7 +142,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-2xl font-semibold">Private Dashboard</h1>
             <p className="text-sm text-muted-foreground">
-              Welcome Shreyaj.
+              Welcome Shreyaj
             </p>
           </div>
           <Link href="/">

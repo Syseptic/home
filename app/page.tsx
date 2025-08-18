@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowUpRight, Github, Linkedin, Mail  } from "lucide-react";
 import AppDock from "@/components/magicui/appdock";
 import dynamic from "next/dynamic";
+import { Meteors } from "@/components/magicui/meteors";
+
 const HelloSplash = dynamic(() => import("@/components/hellosplash"), { ssr: true });
 
 interface PublicNote {
@@ -21,6 +23,20 @@ interface PublicNote {
   created_at: string;
 }
 
+
+export function LoginPage() {
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    })
+  }
+  return (
+    <a onClick={handleLogin}> © {new Date().getFullYear()} SHREYAJ YADAV. </a> 
+  )
+}
 
 
 export default function HomePage() {
@@ -43,6 +59,7 @@ export default function HomePage() {
 
   return (
     <HelloSplash step={160} hold={600} bigger>
+    <Meteors />
     <div className="min-h-screen">
       {/* Hero */}
       <header className="mx-auto max-w-3xl px-6 pt-20 text-center">
@@ -76,7 +93,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="mx-auto max-w-3xl px-6 pb-16 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Your Name. Built with Next.js, Supabase, and shadcn/ui.
+       <LoginPage />
       </footer>
       <AppDock />
     </div>

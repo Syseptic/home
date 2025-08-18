@@ -1,12 +1,22 @@
+// components/AppDock.tsx
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Dock, DockIcon, DockSeparator } from "@/components/magicui/dock";
-import { Home, PencilLine, Github, Linkedin, Mail, MoonStar, Sun } from "lucide-react";
-import { useDarkMode } from "@/components/theme"; 
+import { Home, PencilLine, Github, Linkedin, Mail, Instagram } from "lucide-react";
+
+
+// Import MagicUI toggler without SSR to avoid hydration mismatch
+const AnimatedThemeToggler = dynamic(
+  () =>
+    import("@/components/magicui/animated-theme-toggler").then(
+      (m) => m.AnimatedThemeToggler
+    ),
+  { ssr: false }
+);
 
 export default function AppDock() {
-  const { isDark, setIsDark } = useDarkMode();
   return (
     <div
       className="
@@ -14,7 +24,7 @@ export default function AppDock() {
         pb-[calc(env(safe-area-inset-bottom)+12px)]
       "
     >
-      {/* Mobile dock (compact, no hover animation on touch) */}
+      {/* Mobile */}
       <div className="flex sm:hidden">
         <Dock
           iconSize={36}
@@ -40,45 +50,35 @@ export default function AppDock() {
 
           <DockSeparator />
 
-          <a
-            href="https://github.com/yourname"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-          >
+          <a href="https://www.instagram.com/syseptic_25/" target="_blank" aria-label="Instagram">
+            <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
+              <Instagram className="h-6 w-6" strokeWidth={1.5} />
+            </DockIcon>
+          </a>
+
+          <a href="https://github.com/Syseptic" target="_blank" rel="noreferrer" aria-label="GitHub">
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
               <Github className="h-5 w-5" strokeWidth={1.5} />
             </DockIcon>
           </a>
 
-          <a
-            href="https://www.linkedin.com/in/yourname"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="LinkedIn"
-          >
+          <a href="https://www.linkedin.com/in/shreyaj-yadav/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
               <Linkedin className="h-5 w-5" strokeWidth={1.5} />
             </DockIcon>
           </a>
 
-          <a href="mailto:you@example.com" aria-label="Email" title="Email">
-            <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
-              <Mail className="h-5 w-5" strokeWidth={1.5} />
-            </DockIcon>
-          </a>
 
           <DockSeparator />
 
-          <button aria-label="Toggle theme" title="Toggle theme" type="button">
-            <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
-              <MoonStar className="h-5 w-5" strokeWidth={1.5} />
-            </DockIcon>
-          </button>
+          {/* MagicUI toggler (client-only) */}
+          <DockIcon className="rounded-full hover:bg-white/10 transition-colors p-0">
+            <AnimatedThemeToggler className="h-5 w-5" />
+          </DockIcon>
         </Dock>
       </div>
 
-      {/* Desktop dock (hover spacing animation) */}
+      {/* Desktop */}
       <div className="hidden sm:flex">
         <Dock
           iconSize={48}
@@ -104,50 +104,31 @@ export default function AppDock() {
 
           <DockSeparator />
 
-          <a
-            href="https://github.com/yourname"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-          >
+          <a href="https://www.instagram.com/syseptic_25/" target="_blank" aria-label="Instagram">
+            <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
+              <Instagram className="h-6 w-6" strokeWidth={1.5} />
+            </DockIcon>
+          </a>
+
+          <a href="https://github.com/Syseptic" target="_blank" rel="noreferrer" aria-label="GitHub">
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
               <Github className="h-6 w-6" strokeWidth={1.5} />
             </DockIcon>
           </a>
 
-          <a
-            href="https://www.linkedin.com/in/yourname"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="LinkedIn"
-          >
+          <a href="https://www.linkedin.com/in/shreyaj-yadav/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
             <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
               <Linkedin className="h-6 w-6" strokeWidth={1.5} />
             </DockIcon>
           </a>
 
-          <a href="mailto:you@example.com" aria-label="Email" title="Email">
-            <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
-              <Mail className="h-6 w-6" strokeWidth={1.5} />
-            </DockIcon>
-          </a>
 
           <DockSeparator />
 
-          <button
-            onClick={() => setIsDark(!isDark)}
-            aria-label="Toggle theme"
-            title="Toggle theme"
-            type="button"
-          >
-            <DockIcon className="rounded-full hover:bg-white/10 transition-colors">
-              {isDark ? (
-                <Sun className="h-6 w-6" strokeWidth={1.5} />
-              ) : (
-                <MoonStar className="h-6 w-6" strokeWidth={1.5} />
-              )}
-            </DockIcon>
-          </button>
+          {/* MagicUI toggler (client-only) */}
+          <DockIcon className="rounded-full hover:bg-white/10 transition-colors p-0">
+            <AnimatedThemeToggler className="h-6 w-6" />
+          </DockIcon>
         </Dock>
       </div>
     </div>
