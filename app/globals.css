@@ -98,7 +98,9 @@ html.light {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-}
+  --site-gradient: linear-gradient(to right, #ffefba, #ffffff);
+  background-image: var(--site-gradient);
+} 
 
 :root {
   --background: oklch(0.145 0 0);
@@ -152,6 +154,7 @@ html.light {
   to   { transform: translateY(0);    opacity: 1;  }
 }
 
+/* Smooth horizontal sweep */
 @keyframes gradient-x {
   0%, 100% {
     background-size: 200% 200%;
@@ -172,3 +175,9 @@ html.light {
     animation: none;
     mix-blend-mode: normal;
 }
+
+/* IMPORTANT: let the html background show through in light mode */
+html.light body {
+  background-color: transparent !important;  
+}
+
