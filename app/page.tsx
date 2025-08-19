@@ -10,6 +10,7 @@ import { ArrowUpRight } from "lucide-react";
 import AppDock from "@/components/magicui/appdock";
 import dynamic from "next/dynamic";
 import { Meteors } from "@/components/magicui/meteors";
+import  Hero  from "@/components/hero";
 
 const HelloSplash = dynamic(() => import("@/components/hellosplash"), { ssr: true });
 
@@ -59,15 +60,7 @@ export default function HomePage() {
     <Meteors />
     <div className="min-h-screen">
       {/* Hero */}
-      <header className="mx-auto max-w-3xl px-6 pt-20 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">
-          Shreyaj Yadav
-        </h1>
-        <p className="mt-3 text-balance text-muted-foreground">
-          Short one-liner about what you do. Keep it crisp.  
-          Building things with Next.js, Supabase, and shadcn/ui.
-        </p>
-      </header>
+      <Hero />
 
       {/* Divider */}
       <div className="mx-auto mt-12 max-w-3xl px-6">

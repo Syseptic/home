@@ -21,19 +21,20 @@ export default function AppDock() {
     <div
       className="
         fixed left-0 right-0 bottom-0 z-50 flex justify-center
-        pb-[calc(env(safe-area-inset-bottom)+12px)]
+        pb-[calc(env(safe-area-inset-bottom)+12px)] 
       "
     >
       {/* Mobile */}
-      <div className="flex sm:hidden">
+      <div className="flex sm:hidden dock border rounded-2xl">
         <Dock
           iconSize={36}
           iconDistance={160}
           direction="bottom"
           className="
-            pointer-events-auto
-            w-max rounded-2xl border border-white/10 backdrop-blur-md
-            supports-backdrop-blur:bg-white/10 supports-backdrop-blur:dark:bg-black/10
+           relative pointer-events-auto w-max rounded-2xl
+              backdrop-blur-xl backdrop-saturate-150
+              shadow-[0_4px_20px_rgba(0,0,0,0.08)]
+              border
           "
         >
           <Link href="/" aria-label="Home" title="Home">
@@ -79,15 +80,16 @@ export default function AppDock() {
       </div>
 
       {/* Desktop */}
-      <div className="hidden sm:flex">
+      <div className="hidden sm:flex dock border rounded-2xl">
         <Dock
           iconSize={48}
           iconDistance={240}
           direction="bottom"
           className="
-            pointer-events-auto
-            w-max rounded-2xl border border-white/10 backdrop-blur-md
-            supports-backdrop-blur:bg-white/10 supports-backdrop-blur:dark:bg-black/10
+             relative pointer-events-auto w-max rounded-2xl
+              backdrop-blur-xl backdrop-saturate-150
+              shadow-[0_4px_20px_rgba(0,0,0,0.08)]
+              border
           "
         >
           <Link href="/" aria-label="Home" title="Home">

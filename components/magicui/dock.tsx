@@ -190,12 +190,13 @@ function DockSeparator({ className }: { className?: string }) {
     <motion.span
       ref={ref}
       role="separator"
-      className={cn("self-center w-px bg-white/12", className)}
+      className={cn("self-center w-px mx-4", className)}
       style={{
         height: Math.round(S * 0.8),
         marginLeft: gapSpring,
         marginRight: gapSpring,
         willChange: "margin",
+        backgroundColor: "var(--dock-separator)" 
       }}
     />
   );

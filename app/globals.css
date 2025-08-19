@@ -58,7 +58,24 @@
     opacity: 0;
     }
   }
-}
+  --animate-aurora: aurora 8s ease-in-out infinite alternate
+;
+  @keyframes aurora {
+  0% {
+    background-position: 0% 50%;
+    transform: rotate(-5deg) scale(0.9);}
+  25% {
+    background-position: 50% 100%;
+    transform: rotate(5deg) scale(1.1);}
+  50% {
+    background-position: 100% 50%;
+    transform: rotate(-3deg) scale(0.95);}
+  75% {
+    background-position: 50% 0%;
+    transform: rotate(3deg) scale(1.05);}
+  100% {
+    background-position: 0% 50%;
+    transform: rotate(-5deg) scale(0.9);}}}
 
 body {
   font-family: Geist, Arial, Helvetica, sans-serif;
@@ -181,3 +198,21 @@ html.light body {
   background-color: transparent !important;  
 }
 
+/* Dock variables - default (dark mode) */
+:root {
+  --dock-bg: rgba(255, 255, 255, 0.01);   /* white tint on dark */
+  --dock-border: rgba(255, 255, 255, 0.2);
+  --dock-separator: rgba(255, 255, 255, 0.3);
+}
+
+/* Dock variables - light mode */
+:root.light {
+  --dock-bg: rgba(0, 0, 0, 0.03);         /* black tint on light */
+  --dock-border: rgba(0, 0, 0, 0.2);
+  --dock-separator: rgba(0, 0, 0, 0.2);
+}
+
+.dock {
+  background-color: var(--dock-bg);
+  border-color: var(--dock-border);
+}
