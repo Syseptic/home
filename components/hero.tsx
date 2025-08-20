@@ -3,7 +3,7 @@ import { AuroraText } from "@/components/magicui/aurora-text";
 
 export default function Hero() {
   return (
-    <section className="relative flex items-center justify-center min-h-[50vh]">
+    <section className="relative flex items-center justify-center min-h-[50vh] mt-20 sm:mt-30">
       <div className="flex flex-col items-center text-center gap-6">
         
         {/* Location */}
@@ -40,7 +40,7 @@ export default function Hero() {
               यादव
             </span>
           </div>
-          <div className="mt-12 text-center">
+          <div className="mt-12 sm:mt-35 text-center">
             <p className="text-lg sm:text-3xl font-medium tracking-wide text-foreground">
               Making things, breaking things, <AuroraText>learning always.</AuroraText>
             </p>

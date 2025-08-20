@@ -216,3 +216,10 @@ html.light body {
   background-color: var(--dock-bg);
   border-color: var(--dock-border);
 }
+
+.polaroid {
+  filter: contrast(95%) brightness(95%) sepia(15%) saturate(90%) hue-rotate(-5deg);
+  border: 10px solid #fff;
+  border-bottom: 35px solid #fff;
+  box-shadow: 0px 8px 18px rgba(0,0,0,0.25);
+}

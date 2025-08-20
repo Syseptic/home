@@ -11,6 +11,7 @@ import AppDock from "@/components/magicui/appdock";
 import dynamic from "next/dynamic";
 import { Meteors } from "@/components/magicui/meteors";
 import  Hero  from "@/components/hero";
+// import AboutMe from "@/components/aboutme";
 
 const HelloSplash = dynamic(() => import("@/components/hellosplash"), { ssr: true });
 
@@ -68,7 +69,7 @@ export default function HomePage() {
       </div>
 
       <section className="mx-auto max-w-3xl px-6 py-12">
-        
+        {/* <AboutMe /> */}
       </section>
 
       {/* Footer */}
